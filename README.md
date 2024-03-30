@@ -1,1 +1,1 @@
-# animated-ipsc
+# Adatbázissal összekötött szimpla versenyzői összesítő
