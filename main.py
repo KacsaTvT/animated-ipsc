@@ -8,7 +8,7 @@ database = mysql.connector.connect(
 )
 cursor = database.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS ipsc (csapat VARCHAR(255), nev VARCHAR(255), pontok INT(255))")
+cursor.execute("CREATE TABLE IF NOT EXISTS ipsc (csapat VARCHAR(255), nev VARCHAR(255), division VARCHAR(255), pontok INT(255), sector INT(255))")
 ##hiba esetén nézd meg az 'sql.sql' fájlt
 
 folytat = True
@@ -19,6 +19,11 @@ while folytat:
     if elso == 1:
         elsomasodik = int(input("Műveletek:\n1. Versenyző hozzáadása\n2. Versenyző eltávolítása\n-->"))
         if elsomasodik == 1:
+            sector = input("\nMelyik Sectorhoz ad hozzá?\n-->")
+            if sector.isdigit():
+                sectorbe = int(sector)
+            else:
+                print("Nem adtál meg sectort!")
             masodik1 = input("Írja be a versenyző csapatát.\n-->")
             if masodik1 == "":
                 print("Nem adtál meg csapatot!")
@@ -33,26 +38,29 @@ while folytat:
                     if masodik13 == "":
                         print("Nem adtál meg pontszámot")
                     else:
-                        cursor.execute("INSERT INTO ipsc (csapat, nev, pontok) VALUES (%s, %s, %s)", (masodik1, masodik12, masodik13))
-                        database.commit()
-        if elsomasodik == 2:
-            delete = input("Adja meg a törölni kívánt versenyző nevét:\n-->")
-            if delete == "":
-                print("Nem adtál meg törölni kívánt személyt.")
-            else:
-                cursor.execute("DELETE FROM ipsc WHERE nev=%s", (delete,))
-                database.commit()
+                        masodik14 = input("Adja meg a versenyző divízióját.\n-->")
+                        if masodik14 == "":
+                            print("Nem adtál meg divíziót.")
+                        else:
+                            cursor.execute("INSERT INTO ipsc (csapat, nev, pontok, division, sector) VALUES (%s, %s, %s, %s, %s)", (masodik1, masodik12, masodik13, masodik14, sector))
+                            database.commit()
+            if elsomasodik == 2:
+                delete = input("Adja meg a törölni kívánt versenyző nevét:\n-->")
+                if delete == "":
+                    print("Nem adtál meg törölni kívánt személyt.")
+                else:
+                    cursor.execute("DELETE FROM ipsc WHERE nev=%s", (delete,))
+                    database.commit()
     if elso == 2:
-        cursor.execute("SELECT csapat, nev, pontok FROM ipsc")
+        cursor.execute("SELECT csapat, nev, pontok, division FROM ipsc")
         result= cursor.fetchall()
         print("Regisztrált versenyzők:")
-        for (csapat, nev, pontok) in result:
-            print(f"{csapat}, {nev}, {pontok}")
-        print("---\n---\n---\n")
+        for (csapat, nev, pontok, division) in result:
+            print(f"Csapat: {csapat}; Név: {nev}; Pontok: {pontok}; Divízió: {division}")
     if elso == 3:
-        rangsoropc = int(input("Lehetőségek:\n1. Egyéni összesítő\n2. Csapatos összesítő\n-->"))
+        rangsoropc = int(input("Lehetőségek:\n1. Egyéni összesítő\n2. Csapatos összesítő\n3. Division összesítő\n-->"))
         if rangsoropc == 1:
-            cursor.execute("SELECT nev, pontok FROM ipsc ORDER BY pontok DESC")
+            cursor.execute("SELECT nev, SUM(pontok) as sumpont FROM ipsc GROUP BY nev ORDER BY sumpont DESC")
             #cursor = cursor.fetchall()
             helyezes = 1
             for (nev, pontok) in cursor:
@@ -64,5 +72,12 @@ while folytat:
             for (csapat, osszesitett_csap) in cursor:
                 print(f"{helyezes_csap}. helyezett a {csapat} csapat, Összesített pontszáma: {osszesitett_csap}")
                 helyezes_csap+=1
+        if rangsoropc == 3:
+            divisionopc = input("Melyik divízió rangsorát szeretnéd látni?\n-->")
+            cursor.execute("SELECT division, nev, SUM(pontok) AS osszpontok FROM ipsc WHERE division=%s GROUP BY division, nev ORDER BY osszpontok DESC", (divisionopc,))
+            helyezes_div=1
+            for (division, nev, pontok) in cursor:
+                print(f"{helyezes_div}. helyezett {nev} a {divisionopc} kategóriában, Összesített pontszáma: {pontok}")
+                helyezes_div+=1
 
-#divíziók és sectorok hozzáadása
+#terv: holtverseny kezelése
