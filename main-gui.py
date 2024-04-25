@@ -52,13 +52,6 @@ def show_rankings():
     result_text = "\n".join([f"{index+1}. {csapat}, {osszesitett_csap}" for index, (csapat, osszesitett_csap) in enumerate(result)])
     messagebox.showinfo("Csapat rangsor", result_text)
 
-def show_divrankings(): #még nem működik
-    searchdiv = show_divrankings.get()
-    cursor.execute("SELECT division, nev, SUM(pontok) AS osszpontok FROM ipsc WHERE division=%s GROUP BY division, nev ORDER BY division, osszpontok DESC", (searchdiv,))
-    result = cursor.fetchall()
-    result_text = "\n".join([f"{index+1}. {division}, {nev}, {osszpontok}" for index, (division, nev, osszpontok) in enumerate(result)])
-    messagebox.showinfo("Divíziós rangsor", result_text)
-
 def show_allrankings():
     cursor.execute("SELECT nev, SUM(pontok) AS osszpontok FROM ipsc GROUP BY nev ORDER BY osszpontok DESC")
     result = cursor.fetchall()
@@ -98,11 +91,6 @@ Label(root, text="Eredmények").grid(row=10, column=0)
 Button(root, text="Versenyzők listája", command=show_competitors).grid(row=11, column=0, columnspan=2)
 
 Button(root, text="Eredmények (Csapat)", command=show_rankings).grid(row=13, column=0, columnspan=2)
-
-Label(root, text="Keresett Divízió: még nem működik!!!").grid(row=14, column=0)
-show_divrankings = Entry(root)
-show_divrankings.grid(row=14, column=1)
-Button(root, text="Eredmények (Divíziók) még nem működik!!!", command=show_divrankings).grid(row=15, column=0, columnspan=2)
 
 Button(root, text="Eredmények (Mindenki)", command=show_allrankings).grid(row=16, column=0, columnspan=2)
 
