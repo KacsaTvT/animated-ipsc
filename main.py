@@ -103,3 +103,5 @@ while folytat:
                     helyezes_div+=1
                 print(f"{helyezes_div}. helyezett {nev} a {divisionopc} kategóriában, Összesített pontszáma: {pontok}")
                 elozo_pontok=pontok
+
+#ha csapat nem egyezik, akkor ne összesítse a név alapján
